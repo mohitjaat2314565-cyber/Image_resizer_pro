@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Resizer Pro - Unlimited & Secure</title>
+    <style>
+        :root { --primary: #007bff; --success: #28a745; --dark: #1a1a1a; --gray: #f4f4f4; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--gray); display: flex; flex-direction: column; min-height: 100vh; }
+        
+        .navbar { background: var(--dark); color: white; padding: 15px 20px; display: flex; align-items: center; position: fixed; width: 100%; top: 0; z-index: 1000; box-sizing: border-box; }
+        .menu-btn { font-size: 24px; cursor: pointer; margin-right: 20px; }
+        
+        .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: #222; color: white; transition: 0.3s; padding-top: 60px; z-index: 999; overflow-y: auto; }
+        .sidebar div { padding: 15px 25px; border-bottom: 1px solid #333; }
+        .sidebar h4 { margin: 0; color: var(--primary); }
+        .sidebar p { font-size: 13px; color: #bbb; line-height: 1.4; }
+        
+        .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; padding-bottom: 50px; }
+        .container { max-width: 500px; width: 90%; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin: 100px auto 20px; text-align: center; }
+        
+        .preview-box { margin: 20px 0; border: 2px dashed #ccc; min-height: 180px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: #fafafa; }
+        canvas { max-width: 100%; display: none; }
+        
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; }
+        .btn { padding: 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; font-size: 16px; transition: 0.3s; }
+        .btn-resize { background: var(--primary); color: white; }
+        .btn-download { background: var(--success); color: white; display: none; }
+
+        footer { background: var(--dark); color: #888; text-align: center; padding: 20px; font-size: 14px; width: 100%; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <span class="menu-btn" onclick="toggleSidebar()">☰</span>
+        <span style="font-weight: bold;">Image Resizer Pro</span>
+    </div>
+
+    <div class="sidebar" id="mySidebar">
+        <div onclick="toggleSidebar()" style="cursor:pointer; background:#333; text-align:right;">✖ Close</div>
+        <div><h4>🏠 Home</h4><p>Fast local image processing.</p></div>
+        <div><h4>ℹ️ About Us</h4><p>We provide browser-based tools ensuring 100% privacy. No server uploads ever.</p></div>
+        <div><h4>🔒 Privacy Policy</h4><p>Your data stays on your device. We don't store or track your images.</p></div>
+        <div><h4>📜 Terms</h4><p>Free for personal and commercial use.</p></div>
+        <div><h4>📦 Version</h4><p>1.1.2 (Stable)</p></div>
+    </div>
+
+    <div class="main-content">
+        <div class="container">
+            <h2 style="margin-top:0;">Resize & Compress</h2>
+            <p style="color:#666; font-size:14px;">Unlimited, Secure & Private.</p>
+            <input type="file" id="upload" accept="image/*">
+            <div class="input-grid">
+                <input type="number" id="width" placeholder="Width (px)">
+                <input type="number" id="height" placeholder="Height (px)">
+            </div>
+            <input type="number" id="quality" placeholder="Quality % (1-100) for KB size" value="90">
+            <div class="preview-box">
+                <p id="hint">Preview Area</p>
+                <canvas id="canvas"></canvas>
+            </div>
+            <button class="btn btn-resize" onclick="processImg()">Process Image</button>
+            <button id="dlBtn" class="btn btn-download" onclick="downloadImg()">Download Optimized Image</button>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2026 Image Resizer Pro. All Rights Reserved. <br>
+        Developed for Fast & Secure Image Optimization.
+    </footer>
+
+    <script>
+        let finalData = "";
+        function toggleSidebar() {
+            const sb = document.getElementById("mySidebar");
+            sb.style.left = sb.style.left === "0px" ? "-280px" : "0px";
+        }
+        function processImg() {
+            const f = document.getElementById('upload').files[0];
+            const w = document.getElementById('width').value;
+            const h = document.getElementById('height').value;
+            const q = document.getElementById('quality').value || 90;
+            if(!f || !w || !h) return alert("Bhai, sari details bharo!");
+            const img = new Image();
+            img.src = URL.createObjectURL(f);
+            img.onload = () => {
+                const cvs = document.getElementById('canvas');
+                cvs.width = w; cvs.height = h;
+                cvs.getContext('2d').drawImage(img, 0, 0, w, h);
+                cvs.style.display = "block";
+                document.getElementById('hint').style.display = "none";
+                document.getElementById('dlBtn').style.display = "block";
+                finalData = cvs.toDataURL("image/jpeg", q/100);
+            };
+        }
+        function downloadImg() {
+            const a = document.createElement('a');
+            a.href = finalData; a.download = "resized_image.jpg"; a.click();
+        }
+    </script>
+</body>
+</html>
