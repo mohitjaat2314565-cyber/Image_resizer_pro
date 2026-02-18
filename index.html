@@ -5,25 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Image Resizer - Pro Tool</title>
     <style>
-        :root { --primary: #007bff; --bg: #f8f9fa; }
+        :root { --primary: #007bff; --success: #28a745; --bg: #f8f9fa; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding-top: 80px; }
         
+        /* Navigation Menu */
         .navbar { background: #1a1a1a; padding: 12px; display: flex; justify-content: center; gap: 20px; position: fixed; top: 0; width: 100%; z-index: 1000; }
         .navbar a { color: #888; text-decoration: none; font-weight: bold; font-size: 14px; }
         .navbar a.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
 
         .container { background: white; max-width: 500px; width: 95%; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
         
-        .upload-area { border: 2px dashed #007bff; border-radius: 10px; padding: 20px; margin-bottom: 20px; background: #f0f7ff; }
-        .preview-info { font-size: 13px; color: #666; margin-top: 10px; }
+        .upload-area { border: 2px dashed #007bff; border-radius: 10px; padding: 20px; margin-bottom: 20px; background: #f0f7ff; position: relative; }
+        #imgPreview { max-width: 100%; max-height: 200px; display: none; margin: 10px auto; border-radius: 5px; border: 1px solid #ddd; }
         
         .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; margin-top: 20px; }
         .input-group { display: flex; flex-direction: column; }
         label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #444; }
         input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
 
-        .btn-main { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 25px; font-size: 16px; }
-        .btn-main:hover { background: #0056b3; }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 16px; transition: 0.3s; }
+        .btn-download { background: var(--success); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; display: none; text-decoration: none; transition: 0.3s; }
+        .btn-main:hover, .btn-download:hover { opacity: 0.9; transform: translateY(-2px); }
         
         footer { margin-top: 30px; padding: 20px; color: #888; font-size: 12px; width: 100%; text-align: center; background: #eee; }
     </style>
@@ -37,38 +39,27 @@
 
     <div class="container">
         <div class="upload-area" id="dropZone">
-            <img id="imgPreview" style="max-width: 100px; display: none; margin-bottom: 10px; border-radius: 5px;">
-            <div id="uploadText">
-                <button onclick="document.getElementById('fileInput').click()" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Select Image</button>
+            <img id="imgPreview">
+            <div id="uploadUI">
+                <button onclick="document.getElementById('fileInput').click()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">Select Image</button>
             </div>
             <input type="file" id="fileInput" hidden accept="image/*">
-            <div class="preview-info" id="fileDetails">Choose an image to start</div>
+            <div id="fileDetails" style="font-size: 13px; color: #666; margin-top: 10px;">Choose an image to start</div>
         </div>
 
-        <h3 style="margin: 0 0 15px 0;">Choose new size and format</h3>
+        <h3 style="margin: 10px 0;">Choose new size and format</h3>
 
         <div class="settings-grid">
-            <div class="input-group">
-                <label>Width (W)</label>
-                <input type="number" id="width" value="70">
-            </div>
+            <div class="input-group"><label>Width (W)</label><input type="number" id="width" value="70"></div>
             <div class="input-group">
                 <label>Unit</label>
                 <select id="unit">
-                    <option value="percent">Percent</option>
-                    <option value="pixels">Pixels</option>
-                    <option value="cm">Centimeters</option>
-                    <option value="inches">Inches</option>
+                    <option value="percent">Percent (%)</option>
+                    <option value="pixels">Pixels (px)</option>
                 </select>
             </div>
-            <div class="input-group">
-                <label>Height (H)</label>
-                <input type="number" id="height" value="70">
-            </div>
-            <div class="input-group">
-                <label>Resolution (DPI)</label>
-                <input type="number" id="dpi" value="72">
-            </div>
+            <div class="input-group"><label>Height (H)</label><input type="number" id="height" value="70"></div>
+            <div class="input-group"><label>Resolution (DPI)</label><input type="number" id="dpi" value="72"></div>
             <div class="input-group">
                 <label>Format</label>
                 <select id="format">
@@ -77,22 +68,21 @@
                     <option value="image/gif">GIF</option>
                 </select>
             </div>
-            <div class="input-group">
-                <label>Quality (%)</label>
-                <input type="number" id="quality" value="90" min="1" max="100">
-            </div>
+            <div class="input-group"><label>Quality (%)</label><input type="number" id="quality" value="90" min="1" max="100"></div>
         </div>
 
-        <button class="btn-main" onclick="processImage()">Resize Image</button>
-        <a id="downloadBtn" style="display:none; margin-top:15px; display:block; color:var(--primary); font-weight:bold; cursor:pointer;"></a>
+        <button class="btn-main" onclick="processImage()">Resize Image Now</button>
+        <a id="downloadBtn" class="btn-download">⬇️ Download Resized Image</a>
     </div>
 
     <footer>
-        &copy; 2026 Image Resizer Pro | Unlimited & Secure Processing
+        &copy; 2026 Image Resizer Pro | Unlimited & Secure
     </footer>
 
     <script>
         const fileInput = document.getElementById('fileInput');
+        const imgPreview = document.getElementById('imgPreview');
+        const downloadBtn = document.getElementById('downloadBtn');
         let originalImg = new Image();
 
         fileInput.onchange = (e) => {
@@ -101,27 +91,27 @@
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     originalImg.src = event.target.result;
-                    document.getElementById('imgPreview').src = event.target.result;
-                    document.getElementById('imgPreview').style.display = 'inline-block';
-                    document.getElementById('fileDetails').innerHTML = `${file.name}<br>${(file.size/1024).toFixed(2)} KB`;
+                    imgPreview.src = event.target.result;
+                    imgPreview.style.display = 'block';
+                    document.getElementById('fileDetails').innerHTML = `<b>${file.name}</b><br>${(file.size/1024).toFixed(2)} KB`;
+                    downloadBtn.style.display = 'none'; // Nayi file aane par download hide
                 };
                 reader.readAsDataURL(file);
             }
         };
 
         function processImage() {
-            if (!fileInput.files[0]) return alert("Bhai, pehle image select karo!");
+            if (!fileInput.files[0]) return alert("Bhai, pehle image toh select karo!");
             
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            let w = document.getElementById('width').value;
-            let h = document.getElementById('height').value;
+            let w = parseFloat(document.getElementById('width').value);
+            let h = parseFloat(document.getElementById('height').value);
             const unit = document.getElementById('unit').value;
             const format = document.getElementById('format').value;
             const quality = document.getElementById('quality').value / 100;
 
-            // Simple Logic for Percent (Baki units ke liye formula add kar sakte hain)
             if(unit === 'percent') {
                 w = (originalImg.width * w) / 100;
                 h = (originalImg.height * h) / 100;
@@ -132,15 +122,18 @@
             ctx.drawImage(originalImg, 0, 0, w, h);
             
             const dataUrl = canvas.toDataURL(format, quality);
-            const link = document.createElement('a');
-            link.href = dataUrl;
-            link.download = `resized_image.${format.split('/')[1]}`;
-            link.click();
-            alert("Image Resized! Download shuru ho gaya hai.");
+            
+            // Download Button ko activate aur show karna
+            downloadBtn.href = dataUrl;
+            downloadBtn.download = `resized_image_${w}x${h}.${format.split('/')[1]}`;
+            downloadBtn.style.display = 'block';
+            
+            alert("Image ready hai! Niche wale Download button par click karein.");
         }
     </script>
 </body>
-                                                       </html>
+</html>
+
         
 
         
