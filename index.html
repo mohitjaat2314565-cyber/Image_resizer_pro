@@ -3,87 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Image Resizer - Pro Tool</title>
+    <title>Image Resizer Pro - Advanced Tool</title>
+    <link rel="icon" type="image/png" href="logo.png">
     <style>
-        :root { --primary: #007bff; --success: #28a745; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding-top: 80px; }
+        :root { --primary: #007bff; --success: #28a745; --purple: #6f42c1; --bg: #ffffff; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: var(--bg); color: #333; overflow-x: hidden; }
         
-        /* Navigation Menu */
-        .navbar { background: #1a1a1a; padding: 12px; display: flex; justify-content: center; gap: 20px; position: fixed; top: 0; width: 100%; z-index: 1000; }
-        .navbar a { color: #888; text-decoration: none; font-weight: bold; font-size: 14px; }
-        .navbar a.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+        /* Fixed Header */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #eee; background: white; position: sticky; top: 0; z-index: 1000; }
+        .logo-box { width: 40px; height: 40px; background: #007bff; border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .logo-box img { width: 100%; height: 100%; object-fit: cover; }
+        .menu-icon { font-size: 28px; cursor: pointer; color: #333; }
 
-        .container { background: white; max-width: 500px; width: 95%; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
+        /* Side Menu */
+        .side-menu { position: fixed; top: 0; right: -100%; width: 100%; height: 100%; background: white; z-index: 2000; transition: 0.4s ease; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
+        .side-menu.active { right: 0; }
+        .menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .close-btn { font-size: 35px; cursor: pointer; color: #666; }
+        .menu-item { display: flex; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid #f5f5f5; text-decoration: none; color: #333; font-weight: 500; }
+        .menu-footer { margin-top: auto; display: flex; flex-direction: column; gap: 12px; }
+        .btn-login { padding: 14px; border: 2px solid var(--primary); color: var(--primary); text-align: center; border-radius: 5px; text-decoration: none; font-weight: bold; }
+        .btn-premium { padding: 14px; background: var(--primary); color: white; text-align: center; border-radius: 5px; text-decoration: none; font-weight: bold; }
+
+        /* Container & Purple Focus */
+        .container { max-width: 500px; width: 90%; margin: 30px auto; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; background: white; }
+        .upload-area { border: 2px dashed var(--primary); border-radius: 10px; padding: 20px; margin-bottom: 15px; background: #f0f7ff; cursor: pointer; }
+        #imgPreview { max-width: 100%; max-height: 150px; display: none; margin: 10px auto; border-radius: 5px; }
         
-        .upload-area { border: 2px dashed #007bff; border-radius: 10px; padding: 20px; margin-bottom: 20px; background: #f0f7ff; position: relative; }
-        #imgPreview { max-width: 100%; max-height: 200px; display: none; margin: 10px auto; border-radius: 5px; border: 1px solid #ddd; }
-        
-        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; margin-top: 20px; }
+        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; }
         .input-group { display: flex; flex-direction: column; }
-        label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #444; }
-        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
+        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; transition: 0.3s; }
+        input:focus, select:focus { border-color: var(--purple); box-shadow: 0 0 8px rgba(111, 66, 193, 0.2); }
 
-        .btn-main { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 16px; transition: 0.3s; }
-        .btn-download { background: var(--success); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; display: none; text-decoration: none; transition: 0.3s; }
-        .btn-main:hover, .btn-download:hover { opacity: 0.9; transform: translateY(-2px); }
+        .lock-row { grid-column: span 2; display: flex; align-items: center; justify-content: flex-end; cursor: pointer; font-size: 13px; font-weight: bold; margin-bottom: 5px; }
+        .kb-box { grid-column: span 2; background: #f9f9f9; padding: 12px; border-radius: 10px; border: 1px solid #eee; margin: 10px 0; }
+
+        .btn-main { background: var(--primary); color: white; border: none; padding: 18px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 17px; }
         
-        footer { margin-top: 30px; padding: 20px; color: #888; font-size: 12px; width: 100%; text-align: center; background: #eee; }
+        #successMsg { display: none; color: var(--success); font-weight: bold; margin: 15px 0 5px; font-size: 15px; }
+        .btn-download { background: var(--success); color: white; border: none; padding: 18px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 5px; font-size: 17px; display: none; text-decoration: none; text-align: center; }
+
+        /* SEO Section Styling */
+        .info-section { max-width: 800px; width: 90%; margin: 40px auto; text-align: left; padding: 20px; line-height: 1.6; }
+        .info-section h1 { font-size: 40px; font-weight: 800; line-height: 1.1; margin-bottom: 15px; color: #1a1a1a; }
+        .info-section h2 { font-size: 28px; font-weight: 700; margin: 40px 0 20px; }
+        .info-section p { font-size: 16px; color: #444; margin-bottom: 15px; }
+
+        .blue-footer { background: #007bff; color: white; width: 100%; padding: 20px 0; text-align: center; font-size: 14px; margin-top: 40px; }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <a href="https://removebackgroundoggg.netlify.app">✂️ BG REMOVER</a>
-        <a href="#" class="active">🖼️ IMAGE RESIZER</a>
-    </nav>
+    <div class="side-menu" id="sideMenu">
+        <div class="menu-header">
+            <div class="logo-box"><img src="logo.png" alt="Logo"></div>
+            <div class="close-btn" onclick="toggleMenu()">✕</div>
+        </div>
+        <nav>
+            <a href="#" class="menu-item">Blog <span>›</span></a>
+            <a href="#" class="menu-item">How it works <span>›</span></a>
+            <a href="#" class="menu-item">Pricing <span>›</span></a>
+            <a href="#" class="menu-item">Contact Us <span>›</span></a>
+        </nav>
+        <div class="menu-footer">
+            <a href="#" class="btn-login">Login</a>
+            <a href="#" class="btn-premium">Get Premium</a>
+        </div>
+    </div>
+
+    <header class="header">
+        <div class="logo-box"><img src="logo.png" alt="Logo"></div>
+        <div class="menu-icon" onclick="toggleMenu()">☰</div>
+    </header>
 
     <div class="container">
-        <div class="upload-area" id="dropZone">
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
             <img id="imgPreview">
-            <div id="uploadUI">
-                <button onclick="document.getElementById('fileInput').click()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">Select Image</button>
-            </div>
+            <div id="uploadUI"><button style="background:var(--primary); color:white; border:none; padding:12px 24px; border-radius:8px; cursor:pointer; font-weight:bold;">Select Image</button></div>
             <input type="file" id="fileInput" hidden accept="image/*">
-            <div id="fileDetails" style="font-size: 13px; color: #666; margin-top: 10px;">Choose an image to start</div>
         </div>
 
-        <h3 style="margin: 10px 0;">Choose new size and format</h3>
-
         <div class="settings-grid">
-            <div class="input-group"><label>Width (W)</label><input type="number" id="width" value="70"></div>
-            <div class="input-group">
-                <label>Unit</label>
-                <select id="unit">
-                    <option value="percent">Percent (%)</option>
-                    <option value="pixels">Pixels (px)</option>
-                </select>
-            </div>
-            <div class="input-group"><label>Height (H)</label><input type="number" id="height" value="70"></div>
-            <div class="input-group"><label>Resolution (DPI)</label><input type="number" id="dpi" value="72"></div>
-            <div class="input-group">
-                <label>Format</label>
-                <select id="format">
-                    <option value="image/jpeg">JPG</option>
-                    <option value="image/png">PNG</option>
-                    <option value="image/gif">GIF</option>
-                </select>
-            </div>
-            <div class="input-group"><label>Quality (%)</label><input type="number" id="quality" value="90" min="1" max="100"></div>
+            <div class="input-group"><label>Width (px)</label><input type="number" id="width" value="800"></div>
+            <div class="input-group"><label>Height (px)</label><input type="number" id="height" value="600"></div>
+            <div class="lock-row" onclick="toggleLock()"><span id="lockIcon">🔒</span> <span style="margin-left:5px;">Aspect Ratio Lock</span></div>
+            <div class="kb-box"><label style="color: var(--purple);">Target File Size (KB) - Optional</label><input type="number" id="targetKB" placeholder="e.g. 50" style="width: 100%; box-sizing: border-box; margin-top: 5px;"></div>
+            <div class="input-group"><label>Format</label><select id="format"><option value="image/jpeg">JPG</option><option value="image/png">PNG</option></select></div>
+            <div class="input-group"><label>Quality (%)</label><input type="number" id="quality" value="90"></div>
         </div>
 
         <button class="btn-main" onclick="processImage()">Resize Image Now</button>
+        <p id="successMsg">✅ Image resize ho gyi, download kre!</p>
         <a id="downloadBtn" class="btn-download">⬇️ Download Resized Image</a>
+        <p id="sizeInfo" style="font-size: 12px; margin-top: 10px; font-weight: bold; color: var(--purple);"></p>
     </div>
 
-    <footer>
-        &copy; 2026 Image Resizer Pro | Unlimited & Secure
-    </footer>
+    <section class="info-section">
+        <h1>Resize images online for free.</h1>
+        <p>Use our free online photo resizer to adjust the size and dimensions of any image in seconds — perfect for posting to social media, printing, and more.</p>
+        <p>Don’t see the size you want? You can define custom sizes.</p>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 40px 0;">
+
+        <h2>What is an image file size?</h2>
+        <p>Images are composed by several dots called pixels, and each of them has a color, represented as a combination of three basic colors (red, green and blue). To store each of these pixels, 3 bytes (24 ones or zeros) are generally used. When an image is large, it may have millions of pixels, and that means storing all information for an image like that in a computer or any device will take millions of bytes.</p>
+        <p>When a camera or cellphone says it takes 10 megapixels photos, it means that each photo has 10 million pixels (mega = million). And having 10 million pixels means it takes 30 million bytes (or 30 megabytes) to store that photo.</p>
+    </section>
+
+    <footer class="blue-footer">2026 © All rights reserved - Image Resizer Pro</footer>
 
     <script>
-        const fileInput = document.getElementById('fileInput');
-        const imgPreview = document.getElementById('imgPreview');
-        const downloadBtn = document.getElementById('downloadBtn');
-        let originalImg = new Image();
+        function toggleMenu() { document.getElementById('sideMenu').classList.toggle('active'); }
+        const fileInput = document.getElementById('fileInput'), widthInput = document.getElementById('width'), heightInput = document.getElementById('height');
+        let isLocked = true, aspectRatio = 1, originalImg = new Image();
+
+        function toggleLock() { isLocked = !isLocked; document.getElementById('lockIcon').innerText = isLocked ? "🔒" : "🔓"; }
 
         fileInput.onchange = (e) => {
             const file = e.target.files[0];
@@ -91,49 +126,46 @@
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     originalImg.src = event.target.result;
-                    imgPreview.src = event.target.result;
-                    imgPreview.style.display = 'block';
-                    document.getElementById('fileDetails').innerHTML = `<b>${file.name}</b><br>${(file.size/1024).toFixed(2)} KB`;
-                    downloadBtn.style.display = 'none'; // Nayi file aane par download hide
+                    originalImg.onload = () => {
+                        aspectRatio = originalImg.width / originalImg.height;
+                        widthInput.value = originalImg.width; heightInput.value = originalImg.height;
+                        document.getElementById('imgPreview').src = originalImg.src;
+                        document.getElementById('imgPreview').style.display = 'block';
+                        document.getElementById('uploadUI').style.display = 'none';
+                        document.getElementById('successMsg').style.display = 'none';
+                        document.getElementById('downloadBtn').style.display = 'none';
+                    };
                 };
                 reader.readAsDataURL(file);
             }
         };
 
+        widthInput.oninput = () => { if (isLocked) heightInput.value = Math.round(widthInput.value / aspectRatio); };
+        heightInput.oninput = () => { if (isLocked) widthInput.value = Math.round(heightInput.value * aspectRatio); };
+
         function processImage() {
-            if (!fileInput.files[0]) return alert("Bhai, pehle image toh select karo!");
-            
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            let w = parseFloat(document.getElementById('width').value);
-            let h = parseFloat(document.getElementById('height').value);
-            const unit = document.getElementById('unit').value;
-            const format = document.getElementById('format').value;
-            const quality = document.getElementById('quality').value / 100;
+            if (!originalImg.src) return alert("Select image first!");
+            const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
+            canvas.width = widthInput.value; canvas.height = heightInput.value;
+            ctx.drawImage(originalImg, 0, 0, canvas.width, canvas.height);
+            const format = document.getElementById('format').value, targetKB = document.getElementById('targetKB').value;
+            let dataUrl;
 
-            if(unit === 'percent') {
-                w = (originalImg.width * w) / 100;
-                h = (originalImg.height * h) / 100;
-            }
+            if (targetKB && format === "image/jpeg") {
+                for (let q = 0.95; q > 0.05; q -= 0.05) {
+                    dataUrl = canvas.toDataURL(format, q);
+                    if (Math.round((dataUrl.length * 3/4) / 1024) <= targetKB) break;
+                }
+            } else { dataUrl = canvas.toDataURL(format, document.getElementById('quality').value/100); }
 
-            canvas.width = w;
-            canvas.height = h;
-            ctx.drawImage(originalImg, 0, 0, w, h);
-            
-            const dataUrl = canvas.toDataURL(format, quality);
-            
-            // Download Button ko activate aur show karna
+            const finalSize = Math.round((dataUrl.length * 3/4) / 1024);
+            document.getElementById('sizeInfo').innerText = `Final Size: ~${finalSize} KB`;
+            document.getElementById('successMsg').style.display = 'block';
+            const downloadBtn = document.getElementById('downloadBtn');
             downloadBtn.href = dataUrl;
-            downloadBtn.download = `resized_image_${w}x${h}.${format.split('/')[1]}`;
+            downloadBtn.download = "resized-image.jpg";
             downloadBtn.style.display = 'block';
-            
-            alert("Image ready hai! Niche wale Download button par click karein.");
         }
     </script>
 </body>
 </html>
-
-        
-
-        
